@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>فريق همة التطوعي</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Cairo&display=swap');
+
+    body {
+      font-family: 'Cairo', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f7f9f9;
+      color: #333;
+      position: relative;
+    }
+
+    header {
+      background-color: #2e7d32;
+      color: white;
+      padding: 30px 20px 20px;
+      text-align: center;
+      position: relative;
+    }
+
+    .logo {
+      position: fixed;
+      top: 50%;
+      left: 0;
+      transform: translateY(-50%);
+      width: 110px;
+      z-index: 999;
+      transition: transform 0.4s ease, box-shadow 0.3s ease;
+      cursor: pointer;
+    }
+
+    .logo:hover {
+      transform: translateY(-50%) scale(1.1) translateX(10px);
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+    }
+
+    nav {
+      background-color: #27632a;
+      display: flex;
+      justify-content: center;
+      padding: 10px;
+      gap: 30px;
+      position: relative;
+      z-index: 10;
+    }
+
+    nav a {
+      color: #b4f0a1;
+      text-decoration: none;
+      font-weight: bold;
+      font-size: 1.1rem;
+      padding: 6px 12px;
+      border-radius: 5px;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    nav a:hover {
+      background-color: orange;
+      color: white;
+    }
+
+    .content {
+      max-width: 900px;
+      margin: 40px auto;
+      padding: 0 20px;
+      position: relative;
+      z-index: 10;
+    }
+
+    .section {
+      background-color: white;
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 30px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      font-size: 15px;
+    }
+
+    .section h2 {
+      color: #2e7d32;
+      margin-bottom: 15px;
+      font-size: 1.4rem;
+    }
+
+    .section p {
+      line-height: 1.8;
+      color: #444;
+    }
+
+    .section.rvision {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .section.rvision .text {
+      flex: 1;
+    }
+
+    .section.rvision img {
+      width: 120px;
+      height: auto;
+      border-radius: 10px;
+    }
+
+    footer {
+      background-color: #2e7d32;
+      color: white;
+      text-align: center;
+      padding: 20px;
+      margin-top: 40px;
+      font-size: 0.9rem;
+      position: relative;
+      z-index: 10;
+    }
+  </style>
+</head>
+<body>
+  <!-- الشعار في يسار ووسط الصفحة -->
+  <img src="logo.png" alt="شعار الفريق" class="logo">
+
+  <header>
+    <h1>فريق همة التطوعي</h1>
+    <p>نرتقي بالعطاء، ونبني الأثر بكل عزيمة وهمة</p>
+  </header>
+
+  <nav>
+    <a href="index.html">الرئيسية</a>
+    <a href="portfolio.html">نشاطاتنا</a>
+    <a href="members.html">مشاركات الأعضاء</a>
+    <a href="contact.html">تواصل معنا</a>
+  </nav>
+
+  <div class="content">
+    <div class="section rvision">
+      <div class="text">
+        <h2>رؤية الفريق لعام 2025</h2>
+        <p>
+          يهدف فريق همة التطوعي إلى تأسيس بيئة تطوعية تُلهم الشباب للعمل المجتمعي، وتساهم في بناء مجتمع أكثر تلاحمًا ووعيًا.
+          بالرغم من أن الفريق لا يزال في مرحلة التأسيس، إلا أن رؤيتنا هذا العام تتمثل في تعزيز المبادرة الذاتية،
+          وتشجيع المشاركة الفعّالة في مشاريع إنسانية وتنموية ذات أثر مستدام.
+        </p>
+      </div>
+      <img src="your-image.jpg" alt="صورة للرؤية">
+    </div>
+
+    <div class="section">
+      <h2>سياسة الفريق</h2>
+      <p>
+        يرتكز عمل الفريق على قيم التعاون، الشفافية، والمساواة. نسعى لتقديم مبادرات واقعية قابلة للتنفيذ والتطوير،
+        مع الحرص على توفير مساحة آمنة ومحفزة للعمل التطوعي. نؤمن بأهمية العمل الجماعي واحترام آراء جميع الأعضاء،
+        ونسعى باستمرار لخلق بيئة تشجع على الابتكار والتعلم.
+      </p>
+    </div>
+
+    <div class="section">
+      <h2>كلمة تأسيس الفريق</h2>
+      <p>
+        يرتكز عمل الفريق على قيم التعاون، الشفافية، والمساواة. نسعى لتقديم مبادرات واقعية قابلة للتنفيذ والتطوير،
+        مع الحرص على توفير مساحة آمنة ومحفزة للعمل التطوعي. نؤمن بأهمية العمل الجماعي واحترام آراء جميع الأعضاء،
+        ونسعى باستمرار لخلق بيئة تشجع على الابتكار والتعلم.
+      </p>
+    </div>
+
+    <div class="section">
+      <h2>مناطق عمل الفريق</h2>
+      <p>
+        يرتكز عمل الفريق على قيم التعاون، الشفافية، والمساواة. نسعى لتقديم مبادرات واقعية قابلة للتنفيذ والتطوير،
+        مع الحرص على توفير مساحة آمنة ومحفزة للعمل التطوعي. نؤمن بأهمية العمل الجماعي واحترام آراء جميع الأعضاء،
+        ونسعى باستمرار لخلق بيئة تشجع على الابتكار والتعلم.
+      </p>
+    </div>
+  </div>
+
+  <footer id="contact">
+    <p>© 2025 فريق همة التطوعي - تلبيسة</p>
+    <p>للتواصل: amin.abojaafer.soft@gmail.com</p>
+  </footer>
+</body>
+</html>
