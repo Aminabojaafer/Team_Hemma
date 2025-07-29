@@ -3,418 +3,247 @@
 <head>
   <meta charset="UTF-8" />
   <title>لوحة تحكم فريق همة</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap');
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getDatabase, ref, set, push, get } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+    import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
+    const firebaseConfig = {
+      apiKey: "AIzaSyCzA6hOJZnCUzdaKhobCt43X7CthLcNuyA",
+      authDomain: "himma-website.firebaseapp.com",
+      databaseURL: "https://himma-website-default-rtdb.firebaseio.com",
+      projectId: "himma-website",
+      storageBucket: "himma-website.appspot.com",
+      messagingSenderId: "369244049009",
+      appId: "1:369244049009:web:e4e9c1888468d40dff95d0",
+      measurementId: "G-PS466MQ5FL"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const storage = getStorage(app);
+
+    async function addMember() {
+      const name = document.getElementById('member-name').value.trim();
+      const imageFile = document.getElementById('member-image').files[0];
+      if (!name || !imageFile) return alert('يرجى إدخال اسم العضو واختيار صورة.');
+
+      const imageRef = sRef(storage, 'members/' + Date.now() + '_' + imageFile.name);
+      await uploadBytes(imageRef, imageFile);
+      const imageUrl = await getDownloadURL(imageRef);
+
+      const memberRef = push(ref(db, 'members'));
+      await set(memberRef, { name, image: imageUrl });
+
+      alert(`تمت إضافة العضو "${name}" بنجاح!`);
+      loadMembers();
+      await loadMemberOptions();
+      document.getElementById('member-name').value = '';
+      document.getElementById('member-image').value = '';
+    }
+
+    async function loadMembers() {
+      const membersContainer = document.getElementById('members-list');
+      membersContainer.innerHTML = '';
+      const snapshot = await get(ref(db, 'members'));
+      if (snapshot.exists()) {
+        const members = snapshot.val();
+        Object.entries(members).forEach(([key, member]) => {
+          const div = document.createElement('div');
+          div.innerHTML = `<strong>${member.name}</strong><br><img src="${member.image}" width="100"><hr>`;
+          membersContainer.appendChild(div);
+        });
+      }
+    }
+
+    async function addPost() {
+      const memberId = document.getElementById('post-member').value;
+      const text = document.getElementById('post-text').value.trim();
+      if (!memberId || !text) return alert('يرجى اختيار عضو وكتابة نص المشاركة.');
+
+      const postRef = push(ref(db, 'posts'));
+      await set(postRef, { memberId, text });
+      alert('تمت إضافة المشاركة بنجاح.');
+      loadPosts();
+      document.getElementById('post-text').value = '';
+    }
+
+    async function loadPosts() {
+      const container = document.getElementById('posts-list');
+      container.innerHTML = '';
+      const [membersSnap, postsSnap] = await Promise.all([
+        get(ref(db, 'members')),
+        get(ref(db, 'posts'))
+      ]);
+      const members = membersSnap.exists() ? membersSnap.val() : {};
+      const posts = postsSnap.exists() ? postsSnap.val() : {};
+      Object.entries(posts).forEach(([id, post]) => {
+        const name = members[post.memberId]?.name || 'عضو غير معروف';
+        const div = document.createElement('div');
+        div.innerHTML = `<strong>${name}</strong>: ${post.text}<hr>`;
+        container.appendChild(div);
+      });
+    }
+
+    async function loadMemberOptions() {
+      const select = document.getElementById('post-member');
+      select.innerHTML = '<option value="">اختر عضوًا</option>';
+      const snapshot = await get(ref(db, 'members'));
+      if (snapshot.exists()) {
+        const members = snapshot.val();
+        Object.entries(members).forEach(([id, m]) => {
+          const option = document.createElement('option');
+          option.value = id;
+          option.textContent = m.name;
+          select.appendChild(option);
+        });
+      }
+    }
+
+    async function addActivity() {
+      const title = document.getElementById('activity-title').value.trim();
+      const desc = document.getElementById('activity-description').value.trim();
+      const count = document.getElementById('activity-count').value.trim();
+      const mainImg = document.getElementById('activity-main-image').files[0];
+      const extraImgs = document.getElementById('activity-extra-images').files;
+
+      if (!title || !desc || !count || !mainImg) return alert('يرجى تعبئة جميع الحقول المطلوبة.');
+
+      const mainRef = sRef(storage, 'activities/main_' + Date.now() + '_' + mainImg.name);
+      await uploadBytes(mainRef, mainImg);
+      const mainUrl = await getDownloadURL(mainRef);
+
+      const extraUrls = [];
+      for (let img of extraImgs) {
+        const refImg = sRef(storage, 'activities/extra_' + Date.now() + '_' + img.name);
+        await uploadBytes(refImg, img);
+        const url = await getDownloadURL(refImg);
+        extraUrls.push(url);
+      }
+
+      const activityRef = push(ref(db, 'activities'));
+      await set(activityRef, {
+        title, description: desc,
+        count: Number(count),
+        mainImage: mainUrl,
+        extraImages: extraUrls
+      });
+
+      alert('تمت إضافة النشاط.');
+      loadActivities();
+      document.getElementById('activity-form').reset();
+    }
+
+    async function loadActivities() {
+      const container = document.getElementById('activities-list');
+      container.innerHTML = '';
+      const snapshot = await get(ref(db, 'activities'));
+      if (snapshot.exists()) {
+        const activities = snapshot.val();
+        Object.entries(activities).forEach(([id, act]) => {
+          const div = document.createElement('div');
+          div.innerHTML = `
+            <h4>${act.title}</h4>
+            <p>${act.description}</p>
+            <p>عدد المستفيدين: ${act.count}</p>
+            <img src="${act.mainImage}" width="150"><br>
+            صور إضافية:<br>
+            ${act.extraImages.map(url => `<img src="${url}" width="100">`).join('')}
+            <hr>
+          `;
+          container.appendChild(div);
+        });
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      loadMembers();
+      loadPosts();
+      loadActivities();
+      loadMemberOptions();
+    });
+  </script>
+  <style>
     body {
       font-family: 'Cairo', sans-serif;
-      margin: 0;
-      padding: 0;
-      background: #e6f4ea;
-      color: #1b5e20;
+      background-color: #e9f7ef; /* أخضر فاتح */
+      padding: 20px;
+      direction: rtl;
     }
-
-    header {
-      background-color: #2e7d32;
-      color: white;
-      padding: 15px 30px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      position: sticky;
-      top: 0;
-      z-index: 1000;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-    }
-
-    header .logo {
-      display: flex;
-      align-items: center;
-      font-size: 22px;
-      font-weight: bold;
-    }
-
-    header .logo span.star {
-      color: #f57c00;
-      font-size: 28px;
-      margin-left: 8px;
-    }
-
-    .section {
-      background: #ffffff;
-      margin: 30px auto;
-      padding: 20px 25px;
-      border-radius: 12px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-      max-width: 900px;
-      animation: fadeIn 1s ease;
-    }
-
     h2 {
       color: #2e7d32;
-      border-bottom: 2px solid #f57c00;
-      padding-bottom: 5px;
-      margin-bottom: 15px;
     }
-
-    input, textarea, select {
-      margin: 10px 0;
-      padding: 10px;
-      width: 100%;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      font-size: 15px;
-      box-sizing: border-box;
-    }
-
-    button {
-      padding: 10px 20px;
-      background: #f57c00;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: background 0.3s, transform 0.2s;
-    }
-
-    button:hover {
-      background: #e65100;
-      transform: scale(1.03);
-    }
-
     label {
       display: block;
-      margin-top: 10px;
-      font-weight: bold;
-      color: #1b5e20;
+      margin: 8px 0 4px;
     }
-
-    img {
+    input, textarea, select {
+      width: 100%;
+      padding: 6px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-family: 'Cairo', sans-serif;
+    }
+    button {
+      background-color: #ff9800; /* برتقالي */
+      color: white;
+      border: none;
+      padding: 10px 20px;
       border-radius: 8px;
-      margin: 5px;
+      cursor: pointer;
     }
-
-    .card {
+    button:hover {
+      background-color: #e68900;
+    }
+    .section {
       background: #ffffff;
-      border: 1px solid #c8e6c9;
-      border-radius: 10px;
       padding: 15px;
-      margin-bottom: 15px;
-      box-shadow: 0 1px 5px rgba(0,0,0,0.05);
-      text-align: center;
-      animation: fadeIn 0.7s ease;
-    }
-
-    #members-list, #posts-list, #activities-list {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 15px;
-      margin-top: 15px;
-    }
-
-    .card img {
-      max-width: 100%;
-      height: auto;
-    }
-
-    .card p {
-      margin: 10px 0 0;
-      color: #388e3c;
-    }
-
-    .slider {
-      display: flex;
-      overflow-x: auto;
-      gap: 10px;
-      scroll-snap-type: x mandatory;
-      padding: 10px 0;
-    }
-
-    .slider img {
-      scroll-snap-align: center;
-      width: 100px;
-      height: auto;
-      flex-shrink: 0;
-      border: 2px solid #f57c00;
-    }
-
-    @media (max-width: 600px) {
-      header .logo {
-        font-size: 18px;
-      }
-
-      .section {
-        margin: 20px 10px;
-        padding: 15px;
-      }
-
-      button {
-        width: 100%;
-      }
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
+      margin-bottom: 25px;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
   </style>
 </head>
 <body>
+  <h1>لوحة تحكم فريق همة</h1>
 
-<header>
-  <div class="logo">
-    <span class="star">★</span> فريق همة التطوعي
+  <div class="section">
+    <h2>إضافة عضو</h2>
+    <label>الاسم:</label>
+    <input type="text" id="member-name">
+    <label>الصورة:</label>
+    <input type="file" id="member-image">
+    <button onclick="addMember()">إضافة عضو</button>
+    <div id="members-list"></div>
   </div>
-</header>
 
-<!-- Firebase SDKs -->
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import { getDatabase, ref, set, push, onValue, get } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-  import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+  <div class="section">
+    <h2>إضافة مشاركة</h2>
+    <label>العضو:</label>
+    <select id="post-member"></select>
+    <label>نص المشاركة:</label>
+    <textarea id="post-text"></textarea>
+    <button onclick="addPost()">إضافة مشاركة</button>
+    <div id="posts-list"></div>
+  </div>
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyCzA6hOJZnCUzdaKhobCt43X7CthLcNuyA",
-    authDomain: "himma-website.firebaseapp.com",
-    databaseURL: "https://himma-website-default-rtdb.firebaseio.com",
-    projectId: "himma-website",
-    storageBucket: "himma-website.appspot.com",
-    messagingSenderId: "369244049009",
-    appId: "1:369244049009:web:e4e9c1888468d40dff95d0",
-    measurementId: "G-PS466MQ5FL"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
-  const storage = getStorage(app);
-
-  // إضافة عضو مع رفع الصورة إلى Storage
-  async function addMember() {
-    const name = document.getElementById('member-name').value.trim();
-    const imageFile = document.getElementById('member-image').files[0];
-    if (!name || !imageFile) {
-      alert('يرجى إدخال اسم العضو واختيار صورة.');
-      return;
-    }
-
-    const imageRef = sRef(storage, 'members/' + Date.now() + '_' + imageFile.name);
-    await uploadBytes(imageRef, imageFile);
-    const imageUrl = await getDownloadURL(imageRef);
-
-    const memberRef = push(ref(db, 'members'));
-    await set(memberRef, { name, image: imageUrl });
-
-    alert(`تمت إضافة العضو "${name}" بنجاح!`);
-
-    loadMembers();
-    await loadMemberOptions();
-
-    // تنظيف الحقول
-    document.getElementById('member-name').value = '';
-    document.getElementById('member-image').value = '';
-  }
-
-  // تحميل خيارات الأعضاء للمشاركة
-  async function loadMemberOptions() {
-    const combo = document.getElementById('post-member');
-    combo.innerHTML = '';
-    const snapshot = await get(ref(db, 'members'));
-    snapshot.forEach(child => {
-      const opt = document.createElement('option');
-      opt.value = child.key;
-      opt.textContent = child.val().name;
-      combo.appendChild(opt);
-    });
-    // عرض أول صورة تلقائياً لو وجدت
-    if (combo.options.length > 0) {
-      combo.value = combo.options[0].value;
-      onMemberChange();
-    } else {
-      document.getElementById('member-preview').src = '';
-    }
-  }
-
-  // عرض صورة العضو المختار في المشاركة
-  async function onMemberChange() {
-    const memberId = document.getElementById('post-member').value;
-    if (!memberId) {
-      document.getElementById('member-preview').src = '';
-      return;
-    }
-    const snapshot = await get(ref(db, 'members/' + memberId));
-    const data = snapshot.val();
-    if (data && data.image) {
-      document.getElementById('member-preview').src = data.image;
-    } else {
-      document.getElementById('member-preview').src = '';
-    }
-  }
-
-  // إضافة مشاركة نصية
-  async function addPost() {
-    const memberId = document.getElementById('post-member').value;
-    const message = document.getElementById('post-message').value.trim();
-    if (!memberId || !message) {
-      alert('يرجى اختيار العضو وكتابة نص المشاركة.');
-      return;
-    }
-    const postRef = push(ref(db, 'posts'));
-    await set(postRef, { memberId, message });
-
-    alert('تمت إضافة المشاركة');
-    loadPosts();
-
-    document.getElementById('post-message').value = '';
-  }
-
-  // إضافة نشاط مع رفع الصورة الرئيسية والصور الإضافية
-  async function addActivity() {
-    const title = document.getElementById('act-title').value.trim();
-    const description = document.getElementById('act-desc').value.trim();
-    const beneficiaries = document.getElementById('act-beneficiaries').value.trim();
-    const mainImage = document.getElementById('act-main').files[0];
-    const extraImages = document.getElementById('act-extra').files;
-
-    if (!title || !description || !beneficiaries || !mainImage) {
-      alert('يرجى ملء كل الحقول واختيار الصورة الرئيسية.');
-      return;
-    }
-
-    // رفع الصورة الرئيسية
-    const mainRef = sRef(storage, 'activities/' + Date.now() + '_' + mainImage.name);
-    await uploadBytes(mainRef, mainImage);
-    const mainUrl = await getDownloadURL(mainRef);
-
-    // رفع الصور الإضافية (حتى 5 صور)
-    const extraUrls = [];
-    for (let i = 0; i < Math.min(extraImages.length, 5); i++) {
-      const refImg = sRef(storage, 'activities/extra/' + Date.now() + '_' + extraImages[i].name);
-      await uploadBytes(refImg, extraImages[i]);
-      const url = await getDownloadURL(refImg);
-      extraUrls.push(url);
-    }
-
-    // حفظ بيانات النشاط في Realtime Database
-    const actRef = push(ref(db, 'activities'));
-    await set(actRef, {
-      title,
-      description,
-      beneficiaries,
-      mainImage: mainUrl,
-      extraImages: extraUrls
-    });
-
-    alert('تمت إضافة النشاط');
-    loadActivities();
-
-    // تنظيف الحقول
-    document.getElementById('act-title').value = '';
-    document.getElementById('act-desc').value = '';
-    document.getElementById('act-beneficiaries').value = '';
-    document.getElementById('act-main').value = '';
-    document.getElementById('act-extra').value = '';
-  }
-
-  // تحميل وعرض الأعضاء
-  function loadMembers() {
-    const container = document.getElementById('members-list');
-    container.innerHTML = '';
-    onValue(ref(db, 'members'), snapshot => {
-      container.innerHTML = '';
-      snapshot.forEach(child => {
-        const m = child.val();
-        container.innerHTML += `<div class="card"><img src="${m.image}" alt="صورة العضو"><br><strong>${m.name}</strong></div>`;
-      });
-    });
-  }
-
-  // تحميل وعرض المشاركات
-  function loadPosts() {
-    const container = document.getElementById('posts-list');
-    container.innerHTML = '';
-    onValue(ref(db, 'posts'), snapshot => {
-      container.innerHTML = '';
-      snapshot.forEach(child => {
-        const post = child.val();
-        get(ref(db, 'members/' + post.memberId)).then(memSnap => {
-          const m = memSnap.val();
-          container.innerHTML += `
-            <div class="card">
-              <img src="${m.image}" width="50" alt="صورة العضو"> 
-              <strong>${m.name}</strong>
-              <p>${post.message}</p>
-            </div>`;
-        });
-      });
-    });
-  }
-
-  // تحميل وعرض النشاطات مع سلايدر الصور الإضافية
-  function loadActivities() {
-    const container = document.getElementById('activities-list');
-    container.innerHTML = '';
-    onValue(ref(db, 'activities'), snapshot => {
-      container.innerHTML = '';
-      snapshot.forEach(child => {
-        const a = child.val();
-        const extras = (a.extraImages || []).map(img => `<img src="${img}" alt="صورة إضافية">`).join('');
-        const extrasSlider = `<div class="slider">${extras}</div>`;
-        container.innerHTML += `
-          <div class="card">
-            <img src="${a.mainImage}" width="200" alt="الصورة الرئيسية"><br>
-            <strong>${a.title}</strong><br>
-            <p>${a.description}</p>
-            <p>عدد المستفيدين: ${a.beneficiaries}</p>
-            ${extrasSlider}
-          </div>
-        `;
-      });
-    });
-  }
-
-  window.addEventListener('DOMContentLoaded', () => {
-    loadMembers();
-    loadPosts();
-    loadActivities();
-    loadMemberOptions();
-    document.getElementById('post-member').addEventListener('change', onMemberChange);
-  });
-</script>
-
-<!-- قسم الأعضاء -->
-<div class="section">
-  <h2>إضافة عضو</h2>
-  <input type="text" id="member-name" placeholder="اسم العضو" />
-  <input type="file" id="member-image" accept="image/*" />
-  <button onclick="addMember()">إضافة</button>
-  <div id="members-list"></div>
-</div>
-
-<!-- قسم المشاركات -->
-<div class="section">
-  <h2>إضافة مشاركة</h2>
-  <select id="post-member"></select><br />
-  <img id="member-preview" src="" alt="صورة العضو المختار" style="max-width:80px; margin-top: 10px;" /><br />
-  <textarea id="post-message" placeholder="نص المشاركة"></textarea>
-  <button onclick="addPost()">نشر</button>
-  <div id="posts-list"></div>
-</div>
-
-<!-- قسم النشاطات -->
-<div class="section">
-  <h2>إضافة نشاط</h2>
-  <input type="text" id="act-title" placeholder="عنوان النشاط" />
-  <textarea id="act-desc" placeholder="وصف النشاط"></textarea>
-  <input type="number" id="act-beneficiaries" placeholder="عدد المستفيدين" min="1" />
-  <label>الصورة الرئيسية:</label>
-  <input type="file" id="act-main" accept="image/*" /><br />
-  <label>صور إضافية (حتى 5):</label>
-  <input type="file" id="act-extra" multiple accept="image/*" /><br />
-  <button onclick="addActivity()">إضافة</button>
-  <div id="activities-list"></div>
-</div>
-
+  <div class="section">
+    <h2>إضافة نشاط</h2>
+    <form id="activity-form" onsubmit="event.preventDefault(); addActivity();">
+      <label>عنوان النشاط:</label>
+      <input type="text" id="activity-title">
+      <label>الوصف:</label>
+      <textarea id="activity-description"></textarea>
+      <label>عدد المستفيدين:</label>
+      <input type="number" id="activity-count">
+      <label>الصورة الرئيسية:</label>
+      <input type="file" id="activity-main-image">
+      <label>صور إضافية (حتى 5):</label>
+      <input type="file" id="activity-extra-images" multiple>
+      <button type="submit">إضافة نشاط</button>
+    </form>
+    <div id="activities-list"></div>
+  </div>
 </body>
 </html>
