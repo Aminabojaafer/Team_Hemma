@@ -1,4 +1,3 @@
-<!-- ✅ داخل ملف index.html المعدل -->
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -124,8 +123,8 @@
 
     #visitor-counter {
       margin-top: 10px;
-      font-size: 0.95rem;
-      color: #e0ffe0;
+      font-size: 0.9rem;
+      color: #ccffcc;
     }
   </style>
 </head>
@@ -146,7 +145,44 @@
   </nav>
 
   <div class="content">
-    <!-- باقي الأقسام كما هي ... -->
+    <div class="section rvision">
+      <div class="text">
+        <h2>رؤية الفريق لعام 2025</h2>
+        <p>
+          يهدف فريق همة التطوعي إلى تأسيس بيئة تطوعية تُلهم الشباب للعمل المجتمعي، وتساهم في بناء مجتمع أكثر تلاحمًا ووعيًا.
+          بالرغم من أن الفريق لا يزال في مرحلة التأسيس، إلا أن رؤيتنا هذا العام تتمثل في تعزيز المبادرة الذاتية،
+          وتشجيع المشاركة الفعّالة في مشاريع إنسانية وتنموية ذات أثر مستدام.
+        </p>
+      </div>
+      <img src="your-image.jpg" alt="صورة للرؤية">
+    </div>
+
+    <div class="section">
+      <h2>سياسة الفريق</h2>
+      <p>
+        يرتكز عمل الفريق على قيم التعاون، الشفافية، والمساواة. نسعى لتقديم مبادرات واقعية قابلة للتنفيذ والتطوير،
+        مع الحرص على توفير مساحة آمنة ومحفزة للعمل التطوعي. نؤمن بأهمية العمل الجماعي واحترام آراء جميع الأعضاء،
+        ونسعى باستمرار لخلق بيئة تشجع على الابتكار والتعلم.
+      </p>
+    </div>
+
+    <div class="section">
+      <h2>كلمة تأسيس الفريق</h2>
+      <p>
+        يرتكز عمل الفريق على قيم التعاون، الشفافية، والمساواة. نسعى لتقديم مبادرات واقعية قابلة للتنفيذ والتطوير،
+        مع الحرص على توفير مساحة آمنة ومحفزة للعمل التطوعي. نؤمن بأهمية العمل الجماعي واحترام آراء جميع الأعضاء،
+        ونسعى باستمرار لخلق بيئة تشجع على الابتكار والتعلم.
+      </p>
+    </div>
+
+    <div class="section">
+      <h2>مناطق عمل الفريق</h2>
+      <p>
+        يرتكز عمل الفريق على قيم التعاون، الشفافية، والمساواة. نسعى لتقديم مبادرات واقعية قابلة للتنفيذ والتطوير،
+        مع الحرص على توفير مساحة آمنة ومحفزة للعمل التطوعي. نؤمن بأهمية العمل الجماعي واحترام آراء جميع الأعضاء،
+        ونسعى باستمرار لخلق بيئة تشجع على الابتكار والتعلم.
+      </p>
+    </div>
   </div>
 
   <footer id="contact">
@@ -155,11 +191,12 @@
     <div id="visitor-counter">جاري تحميل عدد الزوار...</div>
   </footer>
 
-  <!-- ✅ Firebase SDKs -->
+  <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.3.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.3.0/firebase-database-compat.js"></script>
 
   <script>
+    // إعداد Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyCzA6hOJZnCUzdaKhobCt43X7CthLcNuyA",
       authDomain: "himma-website.firebaseapp.com",
@@ -171,15 +208,15 @@
       measurementId: "G-PS466MQ5FL"
     };
 
-    // تهيئة Firebase
+    // تهيئة التطبيق
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
     const counterRef = database.ref('visitorCount');
 
-    // زيادة العداد
+    // زيادة العدد
     counterRef.transaction(current => (current || 0) + 1);
 
-    // عرض العداد
+    // عرض العدد
     counterRef.on('value', snapshot => {
       const count = snapshot.val();
       document.getElementById('visitor-counter').innerText =
