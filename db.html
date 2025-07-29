@@ -206,9 +206,10 @@
     const memberRef = push(ref(db, 'members'));
     await set(memberRef, { name, image: imageUrl });
 
-    alert('تمت إضافة العضو بنجاح');
+    alert(`تمت إضافة العضو "${name}" بنجاح!`);
+
     loadMembers();
-    loadMemberOptions();
+    await loadMemberOptions();
 
     // تنظيف الحقول
     document.getElementById('member-name').value = '';
@@ -230,6 +231,8 @@
     if (combo.options.length > 0) {
       combo.value = combo.options[0].value;
       onMemberChange();
+    } else {
+      document.getElementById('member-preview').src = '';
     }
   }
 
