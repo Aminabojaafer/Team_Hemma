@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>فريق همة التطوعي</title>
   <style>
-    /* نفس التنسيقات التي لديك */
     @import url('https://fonts.googleapis.com/css2?family=Cairo&display=swap');
+
     body {
       font-family: 'Cairo', sans-serif;
       margin: 0;
@@ -14,12 +14,14 @@
       background-color: #f7f9f9;
       color: #333;
     }
+
     header {
       background-color: #2e7d32;
       color: white;
       padding: 30px 20px;
       text-align: center;
     }
+
     nav {
       background-color: #27632a;
       display: flex;
@@ -27,6 +29,7 @@
       padding: 10px;
       gap: 30px;
     }
+
     nav a {
       color: #b4f0a1;
       text-decoration: none;
@@ -36,21 +39,33 @@
       border-radius: 5px;
       transition: background-color 0.3s, color 0.3s;
     }
+
     nav a:hover {
       background-color: orange;
       color: white;
     }
+
     .content {
       max-width: 1000px;
       margin: 40px auto;
       padding: 0 20px;
     }
+
+    .section {
+      background-color: white;
+      border-radius: 10px;
+      padding: 25px;
+      margin-bottom: 30px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
     .members {
       display: flex;
       flex-wrap: wrap;
       gap: 20px;
       justify-content: center;
     }
+
     .member {
       background-color: #f0f4f0;
       border: 1px solid #d0ddd0;
@@ -61,10 +76,12 @@
       box-shadow: 0 2px 6px rgba(0,0,0,0.08);
       transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
+
     .member:hover {
       transform: translateY(-10px);
       box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
     }
+
     .member img {
       border-radius: 50%;
       width: 120px;
@@ -72,16 +89,19 @@
       object-fit: cover;
       margin-bottom: 10px;
     }
+
     .member h3 {
       margin: 5px 0 10px;
       font-size: 18px;
       color: #2e7d32;
     }
+
     .member p {
       font-size: 15px;
       color: #333;
       line-height: 1.6;
     }
+
     footer {
       background-color: #2e7d32;
       color: white;
@@ -106,9 +126,22 @@
   </nav>
 
   <div class="content">
-    <div class="members" id="members-container">
-      <!-- هنا سيتم إدخال المشاركات ديناميكياً -->
-      <p>جاري تحميل المشاركات...</p>
+    <div class="members">
+      <div class="member">
+        <img src="suleman.jpg" alt="سليمان">
+        <h3>سليمان</h3>
+        <p>"العمل التطوعي غير حياتي، أصبحت جزءاً من مجتمع فعال يصنع الأثر."</p>
+      </div>
+      <div class="member">
+        <img src="amin.jpg" alt="أمين">
+        <h3>أمين</h3>
+        <p>"تعلمت من خلال همة أن العطاء لا يقتصر على المال، بل بالوقت والخبرة."</p>
+      </div>
+      <div class="member">
+        <img src="muath.jpg" alt="معاذ">
+        <h3>معاذ</h3>
+        <p>"شاركت في تنظيم فعالية للأطفال وكانت تجربة لا تُنسى مليئة بالمحبة."</p>
+      </div>
     </div>
   </div>
 
@@ -116,57 +149,5 @@
     <p>© 2025 فريق همة التطوعي - تلبيسة</p>
     <p>للتواصل: amin.abojaafer.soft@gmail.com</p>
   </footer>
-
-  <!-- ربط مكتبات Firebase -->
-  <script type="module">
-    // استيراد Firebase modules
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
-    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
-
-    // إعدادات Firebase (خذها من عندك)
-    const firebaseConfig = {
-      apiKey: "AIzaSyCzA6hOJZnCUzdaKhobCt43X7CthLcNuyA",
-      authDomain: "himma-website.firebaseapp.com",
-      databaseURL: "https://himma-website-default-rtdb.firebaseio.com",
-      projectId: "himma-website",
-      storageBucket: "himma-website.firebasestorage.app",
-      messagingSenderId: "369244049009",
-      appId: "1:369244049009:web:e4e9c1888468d40dff95d0",
-      measurementId: "G-PS466MQ5FL"
-    };
-
-    // تهيئة التطبيق
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-
-    const membersContainer = document.getElementById('members-container');
-
-    // المرجع للمشاركات في قاعدة البيانات
-    const membersRef = ref(db, 'members');  // تأكد أن بيانات المشاركات مخزنة تحت المسار "members"
-
-    // الاستماع للبيانات
-    onValue(membersRef, (snapshot) => {
-      membersContainer.innerHTML = ''; // مسح المحتوى القديم
-      const data = snapshot.val();
-      if (data) {
-        // لكل مشاركة نُنشئ div
-        Object.keys(data).forEach(key => {
-          const member = data[key];
-          const memberDiv = document.createElement('div');
-          memberDiv.classList.add('member');
-          memberDiv.innerHTML = `
-            <img src="${member.image || 'default.jpg'}" alt="${member.name}">
-            <h3>${member.name}</h3>
-            <p>"${member.message}"</p>
-          `;
-          membersContainer.appendChild(memberDiv);
-        });
-      } else {
-        membersContainer.innerHTML = '<p>لا توجد مشاركات حالياً.</p>';
-      }
-    }, {
-      onlyOnce: false
-    });
-  </script>
 </body>
 </html>
